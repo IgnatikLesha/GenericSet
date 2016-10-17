@@ -93,22 +93,37 @@ namespace GenericSet
             return false;
         }
 
-        public Set<T> Union(Set<T> additional)
+        public bool SetContains(Set<T> set)   //Is this set included in set 
         {
-            Set<T> result = new Set<T>(set);
+            if(ReferenceEquals(set, null))
+                throw new ArgumentNullException();
+            return SetContains(this, set);
+        }
 
-            foreach (T item in additional.set)
+        public static bool SetContains(Set<T> a, Set<T> b)   // Set b include set a
+        {
+            if(ReferenceEquals(a, null) || ReferenceEquals(b, null))
+                throw new ArgumentNullException();
+            foreach (var elem in a)
             {
-                if (!Contains(item))
-                {
-                    result.Add(item);
-                }
+                if (!b.Contains(elem))
+                    return false;
             }
-            return result;
+            return true;
+        }
+
+        public Set<T> Union(Set<T> set)
+        {
+            if (ReferenceEquals(set, null))
+                throw new ArgumentNullException();
+            return Union(this, set);
         }
 
         public static Set<T> Union(Set<T> a, Set<T> b)
         {
+            if (ReferenceEquals(a, null) || ReferenceEquals(b, null))
+                throw new ArgumentNullException();
+
             Set<T> result = a.Count >= b.Count ? a : b;
             Set<T> otherSet = a.Count <= b.Count ? a : b;
 
@@ -122,23 +137,18 @@ namespace GenericSet
             return result;
         }
 
-        public Set<T> Intersection(Set<T> additional)
+        public Set<T> Intersection(Set<T> set)
         {
-            Set<T> result = new Set<T>();
-
-            foreach (T item in set)
-            {
-                if (additional.set.Contains(item))
-                {
-                    result.Add(item);
-                }
-            }
-
-            return result;
+            if (ReferenceEquals(set, null))
+                throw new ArgumentNullException();
+            return Intersection(this, set);
         }
 
         public static Set<T> Intersection(Set<T> a, Set<T> b)
         {
+            if (ReferenceEquals(a, null) || ReferenceEquals(b, null))
+                throw new ArgumentNullException();
+
             Set<T> result = new Set<T>();
             foreach (T item in a.set)
             {
@@ -150,20 +160,18 @@ namespace GenericSet
             return result;
         }
 
-        public Set<T> Difference(Set<T> additional)
+        public Set<T> Difference(Set<T> set)
         {
-            Set<T> result = new Set<T>();
-
-            foreach (T elem in set)
-            {
-                if (!additional.set.Contains(elem))
-                    result.Add(elem);
-            }
-            return result;
+            if(ReferenceEquals(set, null))
+                throw new ArgumentNullException();
+            return Difference(this, set);
         }
 
         public static Set<T> Difference(Set<T> a, Set<T> b)    //Set a - set b
         {
+            if (ReferenceEquals(a, null) || ReferenceEquals(b, null))
+                throw new ArgumentNullException();
+
             Set<T> result = new Set<T>();
 
             foreach (T elem in a.set)
@@ -173,6 +181,25 @@ namespace GenericSet
             }
             return result;
         }
+
+        public static Set<T> SymmetricDifference(Set<T> a, Set<T> b)
+        {
+            if (ReferenceEquals(a, null) || ReferenceEquals(b, null))
+                throw new ArgumentNullException();
+            Set<T> union = a.Union(b);
+            Set<T> intersection = a.Intersection(b);
+            return union.Difference(intersection);
+        }
+
+        public Set<T> SymmetricDifference(Set<T> set)
+        {
+            if (ReferenceEquals(set, null))
+                throw new ArgumentNullException();
+
+            return SymmetricDifference(this, set);
+        }
+
+
 
         public IEnumerator<T> GetEnumerator()
         {
@@ -186,6 +213,28 @@ namespace GenericSet
         {
             return GetEnumerator();
         }
+
+        public override int GetHashCode()
+        {
+            return GetType().ToString().Length * 13 * Count + GetHashCode();
+        }
+
+        public override bool Equals(object o)
+        {
+            if (ReferenceEquals(o, null))
+                return false;
+            if (ReferenceEquals(this, o))
+                return true;
+            Set<T> set = o as Set<T>;
+            if (ReferenceEquals(set, null))
+                return false;
+            foreach (var elem in set)
+                if (!this.Contains(elem))
+                    return false;
+            return true;
+        }
+
+
 
     }
 }
